@@ -70,7 +70,7 @@ def main():
             k = int(qsplit[-1])
             query = ' '.join(qsplit[:-1])
         else:
-            k = 1000
+            k = 100
 
         q_emb, output_ids, scores, embeddings = search(searcher, id_to_text, query, k)
         tokenizer = AutoTokenizer.from_pretrained('castorini/tct_colbert-v2-hnp-msmarco')
@@ -89,7 +89,9 @@ def main():
 
 
 def token_idf(tokenizer, id_to_text):
-    if os.path.exists('idf_dict.pkl'):
+    
+    expanded_path = os.path.expanduser('~/data/comma_discord/idf_dict.pkl')
+    if os.path.exists(expanded_path):
         #highest idf terms
         print ("Loading idf dict")
 
@@ -176,9 +178,9 @@ def colbert_prf(faiss_searcher, idf_dict, retriever, tokenizer, query, num_fb_do
         #sort and add max term to Vv
         sorted_counts = sorted(merged_counts.items(), key=lambda x: x[1], reverse=True)
         candidate_decode = tokenizer.decode([sorted_counts[0][0]])
-        # while sorted_counts[0][0] in [term[0] for term in V]:
-        #     candidate_decode = tokenizer.decode([sorted_counts[0][0]])
-        #     sorted_counts = sorted_counts[1:]
+        while sorted_counts[0][0] in [term[0] for term in V]:
+            candidate_decode = tokenizer.decode([sorted_counts[0][0]])
+            sorted_counts = sorted_counts[1:]
         if len(sorted_counts) == 0:
             print ("No terms found in cluster")
             continue
